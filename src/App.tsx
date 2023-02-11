@@ -2,24 +2,17 @@ import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import EntityList from './components/EntityList';
 import logo from './assets/sling.png';
-import { IEntity } from './constants/types';
 import axios from 'axios';
 
 const ROOT_DIR = "C:/";
 
-const DUMMY_DATA: IEntity[] = [
-  { name: "apps", isDirectory: true },
-  { name: "docs", isDirectory: true },
-  { name: "contacts.txt", isDirectory: false },
-  { name: "students.json", isDirectory: false },
-];
-
 function App() {
   const [path, setPath] = useState<string[]>([ROOT_DIR]);
+  const [newFolderInput, setNewFolderInput] = useState<string>("");
 
-  // const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-  const { data, isLoading, isError, error } = useQuery({ queryKey: ['todos', path], queryFn: () => axios.post("http://localhost:3000/api/fs/content", { path: path.join("\\") }) })
+  const { data, isLoading, isError, error } = useQuery({ queryKey: ['folderContent', path], queryFn: () => axios.post("http://localhost:3000/api/fs/content", { path: path.join("") }) })
 
   console.log({ data, isLoading, error });
 
@@ -40,6 +33,18 @@ function App() {
     })
   }, []);
 
+  // Mutations
+  const mutation = useMutation({
+    mutationFn: (newFolderPath: string) => axios.post("http://localhost:3000/api/fs/create", {
+      path: newFolderPath
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['folderContent', path] });
+      setNewFolderInput("");
+    }
+  });
+
+
   return (
     <div style={{ minHeight: "100vh", width: "100vw" }}>
       <div>
@@ -47,6 +52,23 @@ function App() {
       </div>
       <div>
         <h1>Current path: {path.join("")}</h1>
+      </div>
+
+      <div>
+        <h4>New Folder</h4>
+        <input
+          type="text"
+          value={newFolderInput}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewFolderInput(e.target.value)}
+        />
+        <button
+          onClick={() => {
+            console.log(path.join("") + newFolderInput)
+            mutation.mutate(path.join("") + newFolderInput);
+          }}
+        >
+          create a new folder
+        </button>
       </div>
       <button
         disabled={path.length === 1}
