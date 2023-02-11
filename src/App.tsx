@@ -15,8 +15,6 @@ const DUMMY_DATA: IEntity[] = [
 function App() {
   const [path, setPath] = useState<string[]>([ROOT_DIR]);
 
-
-
   return (
     <div style={{ minHeight: "100vh", width: "100vw" }}>
       <div>

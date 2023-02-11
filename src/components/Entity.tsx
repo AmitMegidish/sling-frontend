@@ -6,8 +6,9 @@ interface Props {
 }
 
 const Entity: React.FC<Props> = ({ name, isDirectory }) => {
+
     return (
-        <li>Name: {name}, directory: {isDirectory ? "yes!" : "noooo"}</li>
+        <li>{isDirectory ? `[${name}]` : name}</li>
     );
 };
 
