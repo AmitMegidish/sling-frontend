@@ -12,9 +12,9 @@ function App() {
 
   const queryClient = useQueryClient();
 
-  const { data, isLoading, isError, error } = useQuery({ queryKey: ['folderContent', path], queryFn: () => axios.post("http://localhost:3000/api/fs/content", { path: path.join("") }) })
-
-  console.log({ data, isLoading, error });
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['folderContent', path], queryFn: () => axios.post("http://localhost:3000/api/fs/content", { path: path.join("") })
+  })
 
   const handleFolderClick = useCallback((entityName: string) => {
     setPath(oldPath => [...oldPath, `${entityName}/`]);
@@ -34,7 +34,7 @@ function App() {
   }, []);
 
   // Mutations
-  const mutation = useMutation({
+  const createFolderMutation = useMutation({
     mutationFn: (newFolderPath: string) => axios.post("http://localhost:3000/api/fs/create", {
       path: newFolderPath
     }),
@@ -44,9 +44,22 @@ function App() {
     }
   });
 
+  const renameFolderMutation = useMutation({
+    mutationFn: (argsObj: { oldPath: string, newPath: string }) => axios.put("http://localhost:3000/api/fs/rename", { ...argsObj }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['folderContent'] });
+    }
+  });
+
+  const handleRename = (name: string) => {
+    renameFolderMutation.mutate({
+      oldPath: path.join("") + name,
+      newPath: path.join("") + "kakiiiiiiiiiiii"
+    });
+  };
 
   return (
-    <div style={{ minHeight: "100vh", width: "100vw" }}>
+    <div style={{ minHeight: "100vh", maxWidth: "100vw" }}>
       <div>
         <img src={logo} alt="" width={200} height={200 / 3.61} />
       </div>
@@ -64,7 +77,7 @@ function App() {
         <button
           onClick={() => {
             console.log(path.join("") + newFolderInput)
-            mutation.mutate(path.join("") + newFolderInput);
+            createFolderMutation.mutate(path.join("") + newFolderInput);
           }}
         >
           create a new folder
@@ -82,6 +95,7 @@ function App() {
         <EntityList
           entities={data.data.data}
           handleFolderClick={handleFolderClick}
+          handleRename={handleRename}
         />
       )}
     </div>
