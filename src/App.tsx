@@ -1,8 +1,15 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import EntityList from './components/EntityList';
-import logo from './assets/sling.png';
 import axios from 'axios';
+import Header from './components/Header';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import Spinner from 'react-bootstrap/Spinner';
+import Alert from 'react-bootstrap/Alert';
 
 const ROOT_DIR = "C:/";
 
@@ -51,54 +58,65 @@ function App() {
     }
   });
 
-  const handleRename = (name: string) => {
+  const handleRename = useCallback((name: string) => {
     renameFolderMutation.mutate({
       oldPath: path.join("") + name,
       newPath: path.join("") + "kakiiiiiiiiiiii"
     });
-  };
+  }, []);
 
   return (
     <div style={{ minHeight: "100vh", maxWidth: "100vw" }}>
-      <div>
-        <img src={logo} alt="" width={200} height={200 / 3.61} />
-      </div>
-      <div>
-        <h1>Current path: {path.join("")}</h1>
-      </div>
-
-      <div>
-        <h4>New Folder</h4>
-        <input
-          type="text"
-          value={newFolderInput}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewFolderInput(e.target.value)}
-        />
-        <button
-          onClick={() => {
-            console.log(path.join("") + newFolderInput)
-            createFolderMutation.mutate(path.join("") + newFolderInput);
-          }}
-        >
-          create a new folder
-        </button>
-      </div>
-      <button
-        disabled={path.length === 1}
-        onClick={handleGoBack}
-      >
-        [..]
-      </button>
-      {isLoading && <h1>lodaing</h1>}
-      {isError && error}
-      {data && data?.data && (
-        <EntityList
-          entities={data.data.data}
-          handleFolderClick={handleFolderClick}
-          handleRename={handleRename}
-        />
-      )}
-    </div>
+      <Header />
+      <Container className='p-3'>
+        <Row>
+          <Col md={6} xs={12}>
+            <span className='fw-semibold fs-3'>Current path: </span>
+            <span className='fs-3'>{path.join("")}</span>
+          </Col>
+          <Col md={6} xs={12} className="d-flex flex-column align-items-center">
+            <h4>Create a new folder</h4>
+            <Form.Control
+              className='w-50 mb-3'
+              type="text"
+              value={newFolderInput}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewFolderInput(e.target.value)}
+            />
+            <Button
+              className='w-50'
+              variant='success'
+              onClick={() => {
+                console.log(path.join("") + newFolderInput)
+                createFolderMutation.mutate(path.join("") + newFolderInput);
+              }}
+            >
+              CREATE
+            </Button>
+          </Col>
+        </Row>
+        <Row>
+          {isError && (
+            <Alert variant='danger'>
+              An error has occurred
+            </Alert>
+          )}
+          {isLoading && (
+            <Spinner
+              animation="border"
+              variant="primary"
+              className='mx-auto' />
+          )}
+          {data && data?.data && (
+            <EntityList
+              entities={data.data.data}
+              handleFolderClick={handleFolderClick}
+              handleRename={handleRename}
+              handleGoBack={handleGoBack}
+            />
+          )}
+        </Row>
+      </Container >
+    </div >
   );
 }
 
