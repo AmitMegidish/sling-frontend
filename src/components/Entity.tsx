@@ -7,11 +7,29 @@ interface Props {
     isDirectory: boolean;
     handleFolderClick?: (entitiName: string) => void;
     handleRename?: (name: string) => void;
-    handleGoBack?: () => void
+    handleGoBack?: () => void;
 }
 
 const Entity: React.FC<Props> = ({ name, isDirectory, handleFolderClick, handleRename, handleGoBack }) => {
-    console.log("entity render")
+    console.log("entity render");
+
+    const handleNameClick = () => {
+        if (isDirectory) {
+            if (handleFolderClick) {
+                handleFolderClick(name);
+                return;
+            }
+            if (handleGoBack) {
+                handleGoBack();
+            }
+        }
+    }
+
+    const handleRenameClick = () => {
+        if (handleRename) {
+            handleRename(name);
+        }
+    }
 
     return (
         <ListGroup.Item
@@ -21,34 +39,25 @@ const Entity: React.FC<Props> = ({ name, isDirectory, handleFolderClick, handleR
             action={isDirectory}
         >
             <span
-                className={`fs-5 fw-semibold ${isDirectory ? "text-dark" : ""}`}
-                onClick={() => {
-                    if (isDirectory) {
-                        if (handleFolderClick) {
-                            handleFolderClick(name);
-                            return;
-                        }
-                        if (handleGoBack) {
-                            handleGoBack();
-                        }
-                    }
-                }}
-            >   {isDirectory ? `[${name}]` : name}    </span>
+                className={`fs-5 fw-semibold ${isDirectory ? "text-dark dir-name" : ""}`}
+                onClick={handleNameClick}
+            >
+                {isDirectory ? `[${name}]` : name}
+            </span>
             {handleRename && (
                 <div>
                     <Button
                         variant="warning"
-                        onClick={() => {
-                            if (handleRename) {
-                                handleRename(name);
-                            }
-                        }}>
+                        onClick={handleRenameClick}
+                    >
                         RENAME
                     </Button>
                     <Button
                         variant="danger"
                         className="ms-2"
-                    >DELETE</Button>
+                    >
+                        DELETE
+                    </Button>
                 </div>
             )}
         </ListGroup.Item>
