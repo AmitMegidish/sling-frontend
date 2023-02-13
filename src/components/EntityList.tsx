@@ -17,8 +17,9 @@ const EntityList: React.FC<Props> = ({
     handleRename,
     handleGoBack,
     handleDelete
- }) => {
+}) => {
 
+    console.log("list render")
     return (
         <ListGroup style={{ padding: "0 20px" }}>
             <Entity

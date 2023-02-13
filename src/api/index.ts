@@ -1,33 +1,35 @@
 import axios, { AxiosInstance } from "axios";
 import { IDeleteParams, ISinglePath, ITwoPaths } from '../constants/types';
 
-const baseURL = "http://localhost:3000/api/fs";
-const getContentEndpoint = "/content";
-const createFolderEndpoint = "/create";
-const renameEndpoint = "/rename";
-const deleteEndpoint = "/delete";
+const enum EUrl {
+    baseURL = "http://localhost:3000/api/fs",
+    getContentEndpoint = "/content",
+    createFolderEndpoint = "/create",
+    renameEndpoint = "/rename",
+    deleteEndpoint = "/delete"
+}
 
 const instance: AxiosInstance = axios.create({
-    baseURL
+    baseURL: EUrl.baseURL
 });
 
 const getFolderContent = ({ path }: ISinglePath) => {
-    return instance.post(getContentEndpoint, { path });
+    return instance.post(EUrl.getContentEndpoint, { path });
 };
 
 const createNewFolder = ({ path }: ISinglePath) => {
-    return instance.post(createFolderEndpoint, { path });
+    return instance.post(EUrl.createFolderEndpoint, { path });
 };
 
 const renameEntity = ({ oldPath, newPath }: ITwoPaths) => {
-    return instance.put(renameEndpoint, {
+    return instance.put(EUrl.renameEndpoint, {
         newPath,
         oldPath
     });
 };
 
 const deleteEntity = ({ entityPath, isDirectory }: IDeleteParams) => {
-    return instance.delete(deleteEndpoint, {
+    return instance.delete(EUrl.deleteEndpoint, {
         data: {
             entityPath,
             isDirectory

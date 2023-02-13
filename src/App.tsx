@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
-import EntityList from './components/EntityList';
-import api from './api';
 import { IDeleteParams, ISinglePath, ITwoPaths } from './constants/types'
+import api from './api';
+import { validFolderRegex } from './constants/regex';
+import EntityList from './components/EntityList';
 import Header from './components/Header';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -34,7 +35,8 @@ function App() {
       alert("Successfully created a new folder!");
       queryClient.invalidateQueries({ queryKey: ['folderContent', path] });
       setNewFolderInput("");
-    }
+    },
+    onError: () => alert("An error has occurred")
   });
 
   // Rename Mutation
@@ -43,7 +45,8 @@ function App() {
     onSuccess: () => {
       alert("Renaming went successfully!");
       queryClient.invalidateQueries({ queryKey: ['folderContent', path] });
-    }
+    },
+    onError: () => alert("An error has occurred")
   });
 
   // Delete Mutation
@@ -52,7 +55,8 @@ function App() {
     onSuccess: () => {
       alert("Deleting went successfully!");
       queryClient.invalidateQueries({ queryKey: ['folderContent', path] });
-    }
+    },
+    onError: () => alert("An error has occurred")
   });
 
   // Handlers
@@ -62,9 +66,13 @@ function App() {
   }, []);
 
   // Creates a new folder based on the newFolderInput state value.s
-  const handleCreateFolder = () => {
+  const handleCreateFolder = useCallback(() => {
+    if (!newFolderInput.match(validFolderRegex)) {
+      return alert(`The following characters are not allowed: \\ / : * ? " < > |`);
+    }
+
     createFolderMutation.mutate({ path: path.join("") + newFolderInput });
-  };
+  }, [path, newFolderInput]);
 
   const handleDeleteEntity = useCallback(({ entityPath, isDirectory }: IDeleteParams) => {
     deleteEntityMutation.mutate({
@@ -158,15 +166,3 @@ function App() {
 }
 
 export default App;
-
-
-// const createFolderMutation = useMutation({
-  //   mutationFn: (newFolderPath: string) => axios.post("http://localhost:3000/api/fs/create", {
-  //     path: newFolderPath
-  //   }),
-  //   onSuccess: () => {
-  //     alert("Successfully created a new folder!");
-  //     queryClient.invalidateQueries({ queryKey: ['folderContent', path] });
-  //     setNewFolderInput("");
-  //   }
-  // });
