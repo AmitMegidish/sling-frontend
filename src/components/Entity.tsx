@@ -1,17 +1,25 @@
 import React from "react";
 import ListGroup from 'react-bootstrap/ListGroup';
 import Button from "react-bootstrap/Button";
+import { IDeleteParams } from "../constants/types";
 
 interface Props {
     name: string;
     isDirectory: boolean;
+    handleGoBack?: () => void;
     handleFolderClick?: (entitiName: string) => void;
     handleRename?: (name: string) => void;
-    handleGoBack?: () => void;
+    handleDelete?: ({ entityPath, isDirectory }: IDeleteParams) => void;
 }
 
-const Entity: React.FC<Props> = ({ name, isDirectory, handleFolderClick, handleRename, handleGoBack }) => {
-    console.log("entity render");
+const Entity: React.FC<Props> = ({
+    name,
+    isDirectory,
+    handleGoBack,
+    handleFolderClick,
+    handleRename,
+    handleDelete
+}) => {
 
     const handleNameClick = () => {
         if (isDirectory) {
@@ -28,6 +36,15 @@ const Entity: React.FC<Props> = ({ name, isDirectory, handleFolderClick, handleR
     const handleRenameClick = () => {
         if (handleRename) {
             handleRename(name);
+        }
+    }
+
+    const handleDeleteClick = () => {
+        if (handleDelete) {
+            handleDelete({
+                entityPath: name,
+                isDirectory
+            })
         }
     }
 
@@ -55,6 +72,7 @@ const Entity: React.FC<Props> = ({ name, isDirectory, handleFolderClick, handleR
                     <Button
                         variant="danger"
                         className="ms-2"
+                        onClick={handleDeleteClick}
                     >
                         DELETE
                     </Button>

@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
 import EntityList from './components/EntityList';
-import axios from 'axios';
+import api from './api';
+import { IDeleteParams, ISinglePath, ITwoPaths } from './constants/types'
 import Header from './components/Header';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -17,19 +18,18 @@ function App() {
   const [path, setPath] = useState<string[]>([ROOT_DIR]);
   const [newFolderInput, setNewFolderInput] = useState<string>("");
 
-  const joinedPath = path.join("");
+  const joinedPath: string = path.join("");
 
-  const queryClient = useQueryClient();
+  const queryClient: QueryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['folderContent', path], queryFn: () => axios.post("http://localhost:3000/api/fs/content", { path: joinedPath })
-  })
+    queryKey: ['folderContent', path], queryFn: () => api.getFolderContent({ path: joinedPath })
+  });
 
   // Mutations - creating, renaming and deleting files/folders.
+  // Create mutation. 
   const createFolderMutation = useMutation({
-    mutationFn: (newFolderPath: string) => axios.post("http://localhost:3000/api/fs/create", {
-      path: newFolderPath
-    }),
+    mutationFn: ({ path }: ISinglePath) => api.createNewFolder({ path }),
     onSuccess: () => {
       alert("Successfully created a new folder!");
       queryClient.invalidateQueries({ queryKey: ['folderContent', path] });
@@ -37,14 +37,23 @@ function App() {
     }
   });
 
-  const renameFolderMutation = useMutation({
-    mutationFn: (argsObj: { oldPath: string, newPath: string }) => axios.put("http://localhost:3000/api/fs/rename", argsObj),
+  // Rename Mutation
+  const renameEntityMutation = useMutation({
+    mutationFn: ({ oldPath, newPath }: ITwoPaths) => api.renameEntity({ oldPath, newPath }),
     onSuccess: () => {
       alert("Renaming went successfully!");
       queryClient.invalidateQueries({ queryKey: ['folderContent', path] });
     }
   });
 
+  // Delete Mutation
+  const deleteEntityMutation = useMutation({
+    mutationFn: ({ entityPath, isDirectory }: IDeleteParams) => api.deleteEntity({ entityPath, isDirectory }),
+    onSuccess: () => {
+      alert("Deleting went successfully!");
+      queryClient.invalidateQueries({ queryKey: ['folderContent', path] });
+    }
+  });
 
   // Handlers
   // Adds The clicked folder name to the path state, hence causing a rerender and refetching of the relevant data.
@@ -52,14 +61,26 @@ function App() {
     setPath(oldPath => [...oldPath, `${entityName}/`]);
   }, []);
 
-  const handleRename = useCallback((name: string) => {
-    const newName = prompt("Enter a new name");
+  // Creates a new folder based on the newFolderInput state value.s
+  const handleCreateFolder = () => {
+    createFolderMutation.mutate({ path: path.join("") + newFolderInput });
+  };
+
+  const handleDeleteEntity = useCallback(({ entityPath, isDirectory }: IDeleteParams) => {
+    deleteEntityMutation.mutate({
+      entityPath: path + entityPath,
+      isDirectory
+    });
+  }, [path]);
+
+  const handleRenameEntity = useCallback((name: string) => {
+    const newName: string | null = prompt("Enter a new name");
 
     if (!newName) {
       return;
     }
 
-    renameFolderMutation.mutate({
+    renameEntityMutation.mutate({
       oldPath: joinedPath + name + '/',
       newPath: joinedPath + newName + "/"
     });
@@ -102,10 +123,8 @@ function App() {
             <Button
               className='w-50'
               variant='success'
-              onClick={() => {
-                console.log(path.join("") + newFolderInput)
-                createFolderMutation.mutate(path.join("") + newFolderInput);
-              }}
+              disabled={newFolderInput.length === 0}
+              onClick={handleCreateFolder}
             >
               CREATE
             </Button>
@@ -126,9 +145,10 @@ function App() {
           {data && data?.data && (
             <EntityList
               entities={data.data.data}
-              handleFolderClick={handleFolderClick}
-              handleRename={handleRename}
               handleGoBack={handleGoBack}
+              handleFolderClick={handleFolderClick}
+              handleRename={handleRenameEntity}
+              handleDelete={handleDeleteEntity}
             />
           )}
         </Row>
@@ -138,3 +158,15 @@ function App() {
 }
 
 export default App;
+
+
+// const createFolderMutation = useMutation({
+  //   mutationFn: (newFolderPath: string) => axios.post("http://localhost:3000/api/fs/create", {
+  //     path: newFolderPath
+  //   }),
+  //   onSuccess: () => {
+  //     alert("Successfully created a new folder!");
+  //     queryClient.invalidateQueries({ queryKey: ['folderContent', path] });
+  //     setNewFolderInput("");
+  //   }
+  // });

@@ -1,16 +1,23 @@
 import React from "react";
-import { IEntity } from "../constants/types";
+import { IDeleteParams, IEntity } from "../constants/types";
 import ListGroup from 'react-bootstrap/ListGroup';
 import Entity from "./Entity";
 
 interface Props {
     entities: IEntity[];
+    handleGoBack: () => void;
     handleFolderClick: (entitiName: string) => void;
     handleRename: (name: string) => void;
-    handleGoBack: () => void;
+    handleDelete: ({ entityPath, isDirectory }: IDeleteParams) => void;
 }
 
-const EntityList: React.FC<Props> = ({ entities, handleFolderClick, handleRename, handleGoBack }) => {
+const EntityList: React.FC<Props> = ({
+    entities,
+    handleFolderClick,
+    handleRename,
+    handleGoBack,
+    handleDelete
+ }) => {
 
     return (
         <ListGroup style={{ padding: "0 20px" }}>
@@ -27,6 +34,7 @@ const EntityList: React.FC<Props> = ({ entities, handleFolderClick, handleRename
                     isDirectory={isDirectory}
                     handleFolderClick={handleFolderClick}
                     handleRename={handleRename}
+                    handleDelete={handleDelete}
                 />
             ))}
         </ListGroup>
