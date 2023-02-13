@@ -6,7 +6,7 @@ import Entity from "./Entity";
 interface Props {
     entities: IEntity[];
     handleGoBack: () => void;
-    handleFolderClick: (entitiName: string) => void;
+    handleFolderClick: (entityName: string) => void;
     handleRename: (name: string) => void;
     handleDelete: ({ entityPath, isDirectory }: IDeleteParams) => void;
 }
@@ -19,7 +19,6 @@ const EntityList: React.FC<Props> = ({
     handleDelete
 }) => {
 
-    console.log("list render")
     return (
         <ListGroup style={{ padding: "0 20px" }}>
             <Entity

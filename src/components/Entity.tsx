@@ -7,7 +7,7 @@ interface Props {
     name: string;
     isDirectory: boolean;
     handleGoBack?: () => void;
-    handleFolderClick?: (entitiName: string) => void;
+    handleFolderClick?: (entityName: string) => void;
     handleRename?: (name: string) => void;
     handleDelete?: ({ entityPath, isDirectory }: IDeleteParams) => void;
 }

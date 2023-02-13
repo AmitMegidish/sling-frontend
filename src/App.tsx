@@ -89,7 +89,7 @@ function App() {
     }
 
     renameEntityMutation.mutate({
-      oldPath: joinedPath + name + '/',
+      oldPath: joinedPath + name + "/",
       newPath: joinedPath + newName + "/"
     });
   }, [joinedPath]);
@@ -150,7 +150,7 @@ function App() {
               variant="primary"
               className='mx-auto' />
           )}
-          {data && data?.data && (
+          {data && data.data && (
             <EntityList
               entities={data.data.data}
               handleGoBack={handleGoBack}
